@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="com.amos.spring.dschange.mapper.ShopMapper">
+
+
+    <select id="findAllShop"  resultType="Shop">
+
+       select * from t_shop where is_delete=0
+
+    </select>
+    
+     <select id="findAllShop2"  resultType="Shop">
+
+       select * from t_shop where is_delete=0
+
+    </select>
+    
+    <update id="updateShop">
+    update t_shop set title = concat(title ,'caiupdateshop') where id = 3
+    </update>
+    
+     <update id="updateShop2">
+    update t_shop set title = concat(title ,'caiupdateshop2') where id = 2
+    </update>
+    
+     <update id="updateShopFail">
+    update t_shop set title = 1concat(title ,'caiupdateshop2') where id = 2
+    </update>
+</mapper>

@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/tx  
+        http://www.springframework.org/schema/tx/spring-tx.xsd 
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+
+
+
+    <!-- 启动扫描 -->
+    <context:component-scan base-package="com.amos.spring">
+        <!-- <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller" /> -->
+    </context:component-scan>
+
+    <!-- 启用CGliB -->
+    <aop:aspectj-autoproxy  />
+
+
+    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <value>classpath*:jdbc.properties</value>
+            </list>
+        </property>
+    </bean>
+
+	<!-- 两个数据源的功用配置，方便下面直接引用 -->
+     <bean id="abstractXADataSource" class="com.atomikos.jdbc.AtomikosDataSourceBean" init-method="init"
+             destroy-method="close" abstract="true">
+        <property name="xaDataSourceClassName" value="com.mysql.jdbc.jdbc2.optional.MysqlXADataSource"/>
+        <property name="poolSize" value="10" />
+        <property name="minPoolSize" value="10"/>
+        <property name="maxPoolSize" value="30"/>
+        <property name="borrowConnectionTimeout" value="60"/>
+        <property name="reapTimeout" value="20"/>
+        <!-- 最大空闲时间 -->
+        <property name="maxIdleTime" value="60"/>
+        <property name="maintenanceInterval" value="60" />
+        <property name="loginTimeout" value="60"/>
+        <property name="logWriter" value="60"/>
+        <property name="testQuery">
+            <value>select 1</value>
+        </property>
+        
+    </bean> 
+    
+    <!-- 配置第一个数据源 -->
+    <bean id="dataSource_a" parent="abstractXADataSource">
+    <!-- value只要两个数据源不同就行，随便取名 -->
+        <property name="uniqueResourceName" value="mysql/sitestone" />
+        <property name="xaDataSourceClassName"
+            value="com.mysql.jdbc.jdbc2.optional.MysqlXADataSource" />
+        <property name="xaProperties">
+            <props>
+                <prop key="URL">${jdbc.url.spider}</prop>
+                <prop key="user">${jdbc.username}</prop>
+                <prop key="password">${jdbc.password}</prop>
+            </props>
+        </property>
+    </bean>
+
+    <!-- 配置第二个数据源-->
+    <bean id="dataSource_b" parent="abstractXADataSource">
+<!-- value只要两个数据源不同就行，随便取名 -->
+        <property name="uniqueResourceName" value="mysql/sitesttwo" />
+        <property name="xaDataSourceClassName"
+            value="com.mysql.jdbc.jdbc2.optional.MysqlXADataSource" />
+        <property name="xaProperties">
+            <props>
+               <prop key="URL">${jdbc_tb.url.spider}</prop>
+                <prop key="user">${jdbc_tb.username}</prop>
+                <prop key="password">${jdbc_tb.password}</prop>
+            </props>
+        </property>
+    </bean>
+  
+
+    <bean name="dynamicDatasource" class="com.amos.spring.datasource.CustomerDatasource">
+        <property name="targetDataSources">
+            <map>
+                <entry key="ds_1" value-ref="dataSource_a"/>
+                <entry key="ds_2" value-ref="dataSource_b"/>
+            </map>
+        </property>
+        <property name="defaultTargetDataSource" ref="dataSource_a"    />
+    </bean>
+    
+    
+    <!-- 为业务逻辑层的方法解析@DataSource注解  为当前线程的routeholder注入数据源key -->
+	 
+   <!-- 为业务逻辑层的方法解析@DataSource注解  为当前线程的routeholder注入数据源key -->
+  <!--  	<bean id="aspectBean" class="com.westone.datasource.aspect.DataSourceAspect"></bean>
+    
+    <aop:config>
+    	<aop:aspect id="dataSourceAspect" ref="aspectBean">
+    	   	<aop:pointcut id="dataSourcePoint" expression="execution(public * com.westone.service.*.*(..))" />
+    	   	<aop:before method="beforeDaoMethod" pointcut-ref="dataSourcePoint"/>
+    	</aop:aspect>
+    </aop:config> -->
+   	<!-- <bean id="aspectBean" class="com.amos.spring.aop.ChooseDataSourceAspect"></bean>
+    
+    <aop:config>
+    	<aop:aspect id="dataSourceAspect" ref="aspectBean">
+    	   	<aop:pointcut id="dataSourcePoint" expression="execution(public * com.amos.spring.dschange.*.*(..))" />
+    	   	<aop:before method="changeDataSourceBeforeMethodExecution" pointcut-ref="dataSourcePoint"/>
+    	</aop:aspect>
+    </aop:config> -->
+
+
+  <!--   <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dynamicDatasource"/>
+         <property name="typeAliasesPackage" value="com.amos.spring.dschange.bean" />
+    </bean> -->
+    
+    <bean id="sqlSessionFactorya" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource_a"/>
+         <property name="typeAliasesPackage" value="com.amos.spring.dschange.bean" />
+         <!-- mapper和resultmap配置路径 --> 
+        <property name="mapperLocations">
+            <list>
+                <!-- 表示在com.amos目录下的任意包下的resultmap包目录中，以-resultmap.xml或-mapper.xml结尾所有文件 --> 
+                <value>classpath:com/amos/spring/dschange/mapper/ShopMapper.xml</value>
+            </list>
+        </property>
+    </bean>
+    <bean id="sqlSessionFactoryb" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource_b"/>
+         <property name="typeAliasesPackage" value="com.amos.spring.dschange.bean" />
+          <!-- mapper和resultmap配置路径 --> 
+        <property name="mapperLocations">
+            <list>
+                <!-- 表示在com.amos目录下的任意包下的resultmap包目录中，以-resultmap.xml或-mapper.xml结尾所有文件 --> 
+                <value>classpath:com/amos/spring/dschange/mapper/ShopMapper.xml</value>
+            </list>
+        </property>
+    </bean>
+<!-- 
+    <bean id="mapperScannerConfigurer" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.amos.spring.dschange.mapper" />
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
+    </bean> -->
+    
+    <!--   <bean name="sqlSessionTemplate" class="org.mybatis.spring.SqlSessionTemplate" scope="prototype">
+        <constructor-arg ref="sqlSessionFactory" />
+    </bean> -->
+    
+    <!-- 配置自定义的SqlSessionTemplate模板，注入相关配置 -->
+    <bean id="sqlSessionTemplate" class="com.amos.spring.mybatis.CustomSqlSessionTemplate" scope="prototype">
+        <constructor-arg ref="sqlSessionFactorya" />
+        <property name="targetSqlSessionFactorys">
+            <map>     
+                <entry value-ref="sqlSessionFactorya" key="ds_1"/>
+                <entry value-ref="sqlSessionFactoryb" key="ds_2"/>
+            </map> 
+        </property>
+    </bean>
+
+    <bean id="mapperScannerConfigurer" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.amos.spring.dschange.mapper" />
+        <property name="sqlSessionTemplateBeanName" value="sqlSessionTemplate"/>
+        <property name="markerInterface" value="com.amos.spring.dschange.mapper.SqlMapper"/>
+    </bean>
+    
+    <!-- jta -->
+    <bean id="atomikosTransactionManager" class="com.atomikos.icatch.jta.UserTransactionManager"
+        init-method="init" destroy-method="close">
+        <property name="forceShutdown">
+            <value>true</value>
+        </property>
+    </bean>
+ 
+    <bean id="atomikosUserTransaction" class="com.atomikos.icatch.jta.UserTransactionImp">
+        <property name="transactionTimeout" value="300" />
+    </bean>
+ 
+    <bean id="springTransactionManager"
+        class="org.springframework.transaction.jta.JtaTransactionManager">
+        <property name="transactionManager">
+            <ref bean="atomikosTransactionManager" />
+        </property>
+        <property name="userTransaction">
+            <ref bean="atomikosUserTransaction" />
+        </property>
+    </bean>
+ <tx:annotation-driven transaction-manager="springTransactionManager" proxy-target-class="true" />
+   <!--  <aop:config  proxy-target-class="true">
+        <aop:advisor pointcut="execution(* *com.amos.spring.dschange..*(..))"
+            advice-ref="txAdvice" />
+    </aop:config>
+ 
+    <tx:advice id="txAdvice" transaction-manager="springTransactionManager">
+        <tx:attributes>
+            <tx:method name="get*"  propagation="REQUIRED"  read-only="true" />
+            <tx:method name="find*"  propagation="REQUIRED"  read-only="true" />
+            <tx:method name="has*"  propagation="REQUIRED"  read-only="true" />
+            <tx:method name="locate*"  propagation="REQUIRED"  read-only="true" />
+            <tx:method name="*"  propagation="REQUIRED" rollback-for="Exception"  />
+        </tx:attributes>
+    </tx:advice>
+ -->
+</beans>
