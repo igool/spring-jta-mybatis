@@ -14,29 +14,15 @@ import java.lang.reflect.Method;
 
 /**
  * <li>类描述：完成数据源的切换，抽类切面，具体项目继承一下，不需要重写即可使用</li>
- *
- * @author： amos.zhou
- * 2013-8-1 上午11:51:40
  * @since v1.0
  */
 @Aspect
 public    class ChooseDataSourceAspect {
-
-    protected static final ThreadLocal<String> preDatasourceHolder = new ThreadLocal<String>();
-
-
     @Pointcut("@annotation(com.amos.spring.annotation.ChooseDataSource)")
     public void methodWithChooseAnnotation() {
 
     }
 
-
-//    /**
-//     * 对所有注解有ChooseDataSource的类进行拦截
-//     */
-//    @Pointcut("cflow(methodWithChooseAnnotation()) && methodWithChooseAnnotation()")
-//    public void changeDatasourcePoint() {
-//    }
 
 
     /**
@@ -51,7 +37,6 @@ public    class ChooseDataSourceAspect {
             DataSourceKeyHolder.setDataSourceKey(null);
             return;
         }
-        preDatasourceHolder.set(DataSourceKeyHolder.getDataSourceKey());
         //将数据源设置到数据源持有者
         DataSourceKeyHolder.setDataSourceKey(resultDS);
 
@@ -86,8 +71,7 @@ public    class ChooseDataSourceAspect {
      */
     @After("methodWithChooseAnnotation()")
     public void restoreDataSourceAfterMethodExecution() {
-        DataSourceKeyHolder.setDataSourceKey(preDatasourceHolder.get());
-        preDatasourceHolder.remove();
+        DataSourceKeyHolder.clearDataSourceKey();
     }
 
 

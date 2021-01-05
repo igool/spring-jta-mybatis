@@ -32,11 +32,6 @@ import com.amos.spring.util.DataSourceKeyHolder;
 
 /**
  * TODO: 增加描述
- * 
- * @author Administrator
- * @date 2015年9月22日 下午6:27:47
- * @version 0.1.0 
- * @copyright stnts.com 
  */
 public class CustomSqlSessionTemplate extends SqlSessionTemplate {
 	 

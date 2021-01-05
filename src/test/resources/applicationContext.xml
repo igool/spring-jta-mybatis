@@ -95,32 +95,7 @@
         <property name="defaultTargetDataSource" ref="dataSource_a"    />
     </bean>
     
-    
-    <!-- 为业务逻辑层的方法解析@DataSource注解  为当前线程的routeholder注入数据源key -->
-	 
-   <!-- 为业务逻辑层的方法解析@DataSource注解  为当前线程的routeholder注入数据源key -->
-  <!--  	<bean id="aspectBean" class="com.westone.datasource.aspect.DataSourceAspect"></bean>
-    
-    <aop:config>
-    	<aop:aspect id="dataSourceAspect" ref="aspectBean">
-    	   	<aop:pointcut id="dataSourcePoint" expression="execution(public * com.westone.service.*.*(..))" />
-    	   	<aop:before method="beforeDaoMethod" pointcut-ref="dataSourcePoint"/>
-    	</aop:aspect>
-    </aop:config> -->
-   	<!-- <bean id="aspectBean" class="com.amos.spring.aop.ChooseDataSourceAspect"></bean>
-    
-    <aop:config>
-    	<aop:aspect id="dataSourceAspect" ref="aspectBean">
-    	   	<aop:pointcut id="dataSourcePoint" expression="execution(public * com.amos.spring.dschange.*.*(..))" />
-    	   	<aop:before method="changeDataSourceBeforeMethodExecution" pointcut-ref="dataSourcePoint"/>
-    	</aop:aspect>
-    </aop:config> -->
 
-
-  <!--   <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
-        <property name="dataSource" ref="dynamicDatasource"/>
-         <property name="typeAliasesPackage" value="com.amos.spring.dschange.bean" />
-    </bean> -->
     
     <bean id="sqlSessionFactorya" class="org.mybatis.spring.SqlSessionFactoryBean">
         <property name="dataSource" ref="dataSource_a"/>

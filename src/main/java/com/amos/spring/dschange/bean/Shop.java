@@ -2,11 +2,7 @@ package com.amos.spring.dschange.bean;
 
 import java.util.Date;
 
-/**
- * User: Baron.Zhang
- * Date: 14-1-6
- * Time: 下午5:19
- */
+
 public class Shop {
 
     /** 主键id */
